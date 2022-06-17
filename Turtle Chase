@@ -1,0 +1,113 @@
+import turtle
+import random
+from time import sleep
+screen = turtle.Screen()
+screen.listen()
+
+done = False
+px = 0 #player x pos
+py = 0 #player y pos
+pSpeed = 5
+life = 3 #player's life count
+x = str(life) 
+
+
+a = turtle.Turtle() #draws the background
+p = turtle.Turtle() #player
+b = turtle.Turtle() #bad guy
+l = turtle.Turtle() #life
+p.shape("circle");p.pu()
+
+speed(0);penup();forward(220) #getting rid of the defualt nameless turtle
+
+def draw_square():
+    a.pu();a.speed(0);a.ht() #the box and other setups
+    a.goto(120,120)
+    a.pd();a.fillcolor("green");a.begin_fill()
+    for i in range(4):
+        a.right(90)
+        a.forward(240)
+    a.end_fill()
+    
+def bStartPos():
+    pos = (random.randint(-120,120),random.randint(-120,120))
+    while p.distance(pos) < 45:
+       pos = (random.randint(-120,120),random.randint(-120,120)) 
+
+    b.pu()
+    b.speed(0);b.goto(pos);b.speed(1.5)
+
+
+def right():
+    global px
+    px += pSpeed
+    checkBounds()
+    p.goto(px,py)
+    
+def left():
+    global px
+    px -= pSpeed
+    checkBounds()
+    p.goto(px,py)
+    
+def up():
+    global py
+    py += pSpeed
+    checkBounds()
+    p.goto(px,py)
+    
+def down():
+    global py
+    py -= pSpeed
+    checkBounds()
+    p.goto(px,py)
+
+def checkBounds(): #bounds are (-120,-120) ~ (120,120)
+    global px
+    global py
+    if px >= 120:
+        px = 120
+    elif px <= -120:
+        px = -120
+    if py >= 120:
+        py = 120
+    elif py <= -120:
+        py = -120
+        
+def checkHit():
+    if b.distance(p) < 8: #hit range
+        global life
+        global x
+        life -= 1 
+        x = str(life)
+        showLife()
+        bStartPos()
+
+def showLife():
+    l.clear()
+    l.write("Remaining Life: " + x)
+
+def track():
+    b.goto(px,py)
+    
+l.ht();l.pu();l.speed(0);l.goto(-120,130)
+p.color("black","mediumspringgreen")
+draw_square()
+b.shape("square");b.color("orange");bStartPos()
+screen.onkey(right,"d")
+screen.onkey(left,"a")
+screen.onkey(up,"w")
+screen.onkey(down,"s")
+
+
+
+showLife()
+while life > 0:
+    track()
+    checkHit()
+    sleep(0.001)
+    
+l.clear();p.ht();b.ht();a.clear() #gameover screen
+bgcolor("gray")
+l.goto(0,0)
+l.write("Game Over",False,"center",font = ("calibri",50))
