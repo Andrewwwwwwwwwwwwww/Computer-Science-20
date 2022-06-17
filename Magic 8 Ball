@@ -1,0 +1,51 @@
+import turtle
+import random as rand
+
+screen = turtle.Screen()
+ball = turtle.Turtle()
+txt = turtle.Turtle()
+inst = turtle.Turtle() #writes the instruction on the top right
+
+fortune = ["most definitely","I'd say yes","it's 100%","yup","for sure","I think so","of course","I guess","you bet","sure","maybe","idk","not sure","50/50","go to bed","nope","not a chance","never","keep dreaming","probably not"]
+
+def run():
+    txt.clear()
+    shake = fortune[rand.randint(0,19)]#picks 1 random fortune to display
+    txt.write(shake, align = "center")
+
+speed(0)
+ball.ht();txt.ht();inst.ht()
+
+penup();forward(230)
+ball.speed(9)
+ball.pu()
+inst.pu();inst.speed(0)
+
+ball.goto(0,-160) 
+ball.pd()
+ball.begin_fill()
+ball.fillcolor("dimgray")
+ball.circle(160,steps = 60) #drawing the outer circle
+ball.end_fill()
+
+ball.pu() 
+ball.goto(0,-84) 
+ball.pd()
+ball.begin_fill()
+ball.fillcolor("black")
+ball.circle(84,steps = 30) #drawing the inner circle
+ball.end_fill()
+
+ball.pu()
+ball.goto(0,-65)
+ball.circle(65,extent = 45) #drawing the triangular die
+ball.pd()
+ball.color("midnightblue")
+ball.begin_fill()
+ball.circle(65,steps=3)
+ball.end_fill()
+
+inst.goto(80,180)
+inst.write("Press S to shake", font =("arial",11,"normal"))
+screen.onkey(run,"s") #picks a random fortune when pressed s
+screen.listen()
