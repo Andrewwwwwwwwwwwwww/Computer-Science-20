@@ -1,0 +1,80 @@
+import turtle
+import random
+
+screen = turtle.Screen()
+out = turtle.Turtle()
+dots = turtle.Turtle()
+
+
+def Outline(): #draws the outline of the dice
+    out.pu()
+    out.setposition(50,50)
+    out.pd()
+    out.left(180)
+    for i in range(4):
+        out.forward(100)
+        out.left(90)
+
+def One(): #draws 1 dot
+    dots.dot(10)
+    
+def Two():  #draws 2 dots
+    dots.setposition(-25,-25)
+    dots.dot(10)
+    dots.setposition(25,25)
+    dots.dot(10)
+    
+def Three(): #draws 3 dots
+    One()
+    Two()
+    
+def Four(): #draws 4 dots
+    Two()
+    dots.setposition(-25,25)
+    dots.dot(10)
+    dots.setposition(25,-25)
+    dots.dot(10)
+    
+def Five(): #draws 5 dots
+    One()
+    Four()
+    
+def Six(): #draws 6 dots
+    Four()
+    dots.setposition(-25,0)
+    dots.dot(10)
+    dots.setposition(25,0)
+    dots.dot(10)
+
+def roll():
+    dots.clear()
+    number = random.randint(1,6) #picks a random number between 1 and 6
+    penup()
+    speed(0)
+    forward(230)
+    dots.setposition(0,0)
+    if number == 1:
+        One()
+    if number == 2:
+        Two()
+    if number == 3:
+        Three()
+    if number == 4:
+        Four()
+    if number == 5:
+        Five()
+    if number == 6:
+        Six()
+
+
+screen.onkey(roll,'r') #calls the function "roll" when r is hit
+screen.listen()
+penup()
+speed(0)
+forward(220)
+out.ht()
+dots.ht()
+out.speed(0)
+dots.speed(0)
+dots.pu()
+Outline()
