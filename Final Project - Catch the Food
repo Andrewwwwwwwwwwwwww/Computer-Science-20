@@ -1,0 +1,260 @@
+""" poison does not reset the score (if you uncomment line 84, 85 and 86, it will),
+but only reduces life. missing a food will decrease your score
+(when the score is at 0 will reduce your life). controls are the arrow keys. 
+
+"""
+
+import turtle
+import random
+import time
+
+screen = turtle.Screen()
+screen.listen()
+
+############### creates every turtle that's not food/poison ################
+p = turtle.Turtle() #player
+bg = turtle.Turtle() #for drawing the background
+sc = turtle.Turtle() #for displaying the current score
+sc1 = turtle.Turtle() #for writing "Score: "
+lif = turtle.Turtle() #for displaying the current lif
+lif1 = turtle.Turtle() #for writing "lif: " 
+ins = turtle.Turtle() #for writing the 1st line of instructions
+ins1 = turtle.Turtle() #for writing the 2nd line of instructions
+ins2 = turtle.Turtle()
+gameOver = turtle.Turtle() #for the gameover screen
+
+############ creates the food & poison turtles ############
+food = []
+for f in range(10):
+    food.append(turtle.Turtle())
+
+poison = []
+for i in range(2):
+    poison.append(turtle.Turtle())
+    
+############ variable declaration ##############
+pX = 0        #changes, player's starting x-cor
+pY = -100     #player's y-cor
+pSpeed = 10   #distance player moves per click
+score = 0     #changes, current score
+life = 3      #changes, current life
+instStage = 0 #keeps track of which set of instructions you're at
+
+
+#moves the player turtle right
+def right():
+    global pX
+    pX += pSpeed
+    checkBounds()
+    p.setx(pX)
+    
+#moves the player turtle left
+def left():
+    global pX
+    pX -= pSpeed
+    checkBounds()
+    p.setx(pX)
+    
+""" checks if the player turtle is in the playzone, 
+and if not, sets the xcor back to the bounder  """
+def checkBounds():
+    global pX
+    if pX >= 200:
+        pX = 200
+    elif pX <= -200:
+        pX = -200
+        
+""" checks if the player cought the food/poison
+and does the action accordingly """
+def checkHit(x):
+    global score
+    global life
+    if p.distance(x) < 9 and x in food: # adds 1 to score if player catchs food
+        score += 1
+        x.speed(0)
+        x.goto(random.randint(-200,200),random.randint(200,800))
+        x.speed(3)
+        scoreUpdate()
+    elif p.distance(x) < 9 and x in poison: # takes 1 from life if player catchs poison
+        x.speed(0)
+        x.goto(random.randint(-200,200),random.randint(200,800))
+        x.speed(3)
+        life -= 1
+        lifeUpdate()
+        # if score > 0: #if the player catches the poison, score gets reset to 0
+        #     score = 0
+        #     scoreUpdate()
+        
+""" checks if the food/poison crossed the boundary,
+deducts 1 from score or life if it's food that hit the ground """
+def checkBoundsFood(x):
+    global score
+    global life
+    if x.ycor() <= -100: #when it hits the boundary
+        x.speed(0)
+        x.goto(random.randint(-200,200),random.randint(200,800)) #sends it back up to a random position
+        x.speed(3)
+        if x in food: #if it's food that hit the ground
+            if score > 0:  #reduces score by 1
+                score -= 1
+                scoreUpdate()
+            elif score == 0: #reduces life by 1 if score is 0
+                life -= 1
+                lifeUpdate()
+
+
+def fall(y): #food and poison falls down (5 coordinates per move)
+    for f in y:
+        f.forward(5) 
+        checkHit(f)
+        checkBoundsFood(f)
+
+def dummy(): #for disabling key bindings for certain times
+    x=0
+    
+def stall(x): # 1x = 1sec stall
+    screen.onkey(dummy,"left")
+    screen.onkey(dummy,"right")
+    for i in range(x*2):
+        p.ht()
+        time.sleep(0.25)
+        p.st()
+        time.sleep(0.25)
+    screen.onkey(left,"left")
+    screen.onkey(right,"right")
+
+def scoreSet(): #writes the score at the beginning of the game
+    sc1.speed(0)
+    sc1.ht();sc1.pu();sc.ht();sc.pu()
+    sc1.goto(-190,-190);sc.goto(-104,-190)
+    sc1.write("Score:  ",True, align = "left", font = ("Comic Sans MS",20, "normal"))
+    sc.goto(-104,-190)
+    scoreUpdate()
+    
+def scoreUpdate(): #updates the score during the game
+    sc.clear()
+    sc.write(score, False, align ="left", font =("Comic Sans MS",20, "normal"))
+    
+def lifeSet(): #writes the life at the beginning 
+    lif1.speed(0);lif.speed(0)
+    lif1.ht();lif1.pu();lif.ht();lif.pu()
+    lif1.goto(110,-190);lif.goto(104,-190)
+    lif1.write("Life:  ",True, align = "left", font = ("Comic Sans MS",20, "normal"))
+    lif.goto(170,-190)
+    lifeUpdate()
+
+def lifeUpdate(): #updates the life during the game
+    lif.clear()
+    lif.write(life, False, align = "left", font = ("Comic Sans MS",20, "normal"))
+    
+    
+def instructions(): #displays the instructions
+    global instStage
+    if instStage == 0: # the first set of instructions
+        ins.speed(0);ins1.speed(0);ins2.speed(0);ins.ht();ins1.ht();ins2.ht();ins.pu();ins1.pu();ins2.pu()
+        ins.goto(0,-140);ins1.goto(0,-165);ins2.goto(190,-190)
+        ins.write("Eat the Food to Score", False, align = "center", font = ("Comic Sans MS",12 , "normal"))
+        ins1.write("Miss the food, you'll lose a point", False, align = "center", font = ("Comic Sans MS",12, "normal"))
+        ins2.write("Enter to Continue", False, align = "right", font = ("Comic Sans MS",8, "normal"))
+        instStage += 1
+    elif instStage == 1: # the second set of instructions
+        instClear()
+        ins.write("If the score is 0, and you miss a food,", False, align = "center", font = ("Comic Sans MS",12, "normal"))
+        ins1.write("you'll lose a life", False, align = "center", font = ("Comic Sans MS",12, "normal"))
+        ins2.write("Enter to Start", False, align = "right", font = ("Comic Sans MS",8, "normal"))
+        instStage += 1
+    elif instStage == 2: # the third (last) set of instructions
+        instClear()
+        ins.write("Eat a poison you lose a life", False, align = "center", font = ("Comic Sans MS",12 , "normal"))
+        ins1.write("You go until your life hits 0", False, align = "center", font = ("Comic Sans MS",12, "normal"))
+        ins2.write("Enter to Start", False, align = "right", font = ("Comic Sans MS",8, "normal"))
+        instStage += 1
+    elif instStage == 3: # when enter is hit after the last instruction, game starts
+        instClear()
+        screen.onkey(dummy,"enter")
+        instStage += 1
+    time.sleep(0.01)
+
+def instClear(): #clears the instrutions
+    ins.clear();ins1.clear();ins2.clear()
+    
+def setup(): #moves the defualt nameless turtle, draws the background and moves the player to the starting position
+    penup();speed(0);forward(220)
+    bg.ht();bg.pu();bg.speed(0);bg.color("red","orange")
+    bg.goto(200,-100)
+    bg.pd()
+    bg.begin_fill()
+    bg.goto(200,200)
+    bg.goto(-200,200)
+    bg.goto(-200,-100)
+    bg.goto(200,-100)
+    bg.end_fill()
+    p.pu();p.speed(0);p.shape("turtle");p.left(90);p.goto(pX,pY);p.speed(4)
+    gameOver.ht()
+    for l in food:
+        l.pu()
+    for i in poison:
+        i.pu()
+        
+def gameOverScreen(): #hides all the turtles and draws the gameover screen
+    for i in food:
+        i.ht()
+    for j in poison:
+        j.ht()
+    p.ht()
+    gameOver.speed(0);gameOver.pu()
+    gameOver.goto(200,200)
+    gameOver.fillcolor("grey")
+    gameOver.pd();gameOver.begin_fill()
+    for _ in range(4):
+        gameOver.right(90)
+        gameOver.fd(400)
+    gameOver.end_fill();gameOver.pu()
+    gameOver.goto(0,0)
+    gameOver.color("Black")
+    gameOver.write("Game Over", False, align = "center", font = ("Comic Sans MS",40, "normal"))
+    gameOver.goto(0,-40)
+    gameOver.write("Your Score was: {}".format(score), False, align = "center", font = ("Comic Sans MS", 20, "normal"))
+    
+    
+
+
+
+############# setups for the game(intructions and sending the turtles to a random position) #############
+instructions()
+setup()
+
+screen.onkey(instructions,"enter")
+
+while instStage < 4: #prevent the game from starting before the instructions are done
+    time.sleep(0.01)
+
+for f in food: #sends food turtles to a random position
+    f.speed(0)
+    f.seth(270)
+    f.goto(random.randint(-200,200),random.randint(200,1200))
+    f.speed(3)
+    
+for j in poison: #sends poison turtle to a random position
+    j.speed(0)
+    j.seth(270)
+    j.goto(random.randint(-200,200),random.randint(500,1600))
+    j.color("green")
+        
+        
+        
+scoreSet()
+lifeSet()
+   
+screen.onkey(right,"right")
+screen.onkey(left,"left")
+
+######### actual game loop #########
+done = False
+while done == False:
+    fall(food)
+    fall(poison)
+    if life <= 0:
+        done = True
+            
+gameOverScreen() #displays the gameover screen
